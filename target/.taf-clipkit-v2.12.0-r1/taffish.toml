@@ -1,0 +1,49 @@
+[package]
+name = "clipkit"
+kind = "tool"
+version = "2.12.0"
+release = 1
+license = "Apache-2.0"
+main = "src/main.taf"
+
+[repository]
+url = "https://github.com/taffish/clipkit"
+
+[meta]
+domain = "bio"
+categories = ["multiple-sequence-alignment", "alignment-trimming", "phylogenetics", "sequence-analysis"]
+keywords = ["ClipKIT", "clipkit", "MSA", "alignment trimming", "smart-gap", "gappy", "kpic", "phylogenomics", "ecomp"]
+description = "ClipKIT 2.12.0 alignment trimming software for phylogenetics and phylogenomics."
+
+[command]
+name = "taf-clipkit"
+
+[runtime]
+pipe = true
+command_mode = true
+
+[container]
+image = "ghcr.io/taffish/clipkit:2.12.0-r1"
+dockerfile = "docker/Dockerfile"
+build_platforms = "linux/amd64,linux/arm64"
+
+[upstream]
+name = "ClipKIT"
+type = "github"
+repo = "JLSteenwyk/ClipKIT"
+homepage = "https://jlsteenwyk.com/ClipKIT/"
+release_url = "https://github.com/JLSteenwyk/ClipKIT/releases/tag/v2.12.0"
+downloads = "https://files.pythonhosted.org/packages/73/83/2039f07a32a84e0d094de1193f6091ad129be6daab0122c21ab97824fb92/clipkit-2.12.0-py3-none-any.whl; https://files.pythonhosted.org/packages/6e/7c/9b94457d9adcbda2227b75b094a12a0d28c02291d6d76264ddd0a7f70dcf/clipkit-2.12.0.tar.gz; https://raw.githubusercontent.com/JLSteenwyk/ClipKIT/v2.12.0/test.ecomp"
+version = "2.12.0"
+commit = "feb0a07903542f1b6b127b12d42065d93cd9f3e8"
+license = "MIT"
+citation = "Steenwyk et al. 2020, ClipKIT: a multiple sequence alignment trimming software for accurate phylogenomic inference"
+doi = "10.1371/journal.pbio.3001007"
+watch = "tags"
+strip_prefix = "v"
+
+[smoke]
+backend = "docker"
+timeout = 180
+exist = ["clipkit", "python", "python3", "bash", "grep", "sed", "gzip", "ldd"]
+test = ["clipkit --version | grep -Fx 'clipkit 2.12.0' >/dev/null && clipkit --help 2>&1 | grep -F 'Usage: clipkit <input>' >/dev/null && clipkit --help 2>&1 | grep -F 'smart-gap' >/dev/null && python -c 'import Bio, clipkit, numpy, zstandard; from clipkit.version import __version__; assert __version__ == \"2.12.0\"' && grep -F 'source_sha256=e6fa1aa08bff0bf3962c38622ac3193dc9fd7c7adb4341058b34288e97c9ce80' /opt/clipkit/share/doc/clipkit/source.txt >/dev/null && grep -F 'ecomp_sha256=f9f9b2a1084757586a797708a5198156347164516393462a04a5cd624d568065' /opt/clipkit/share/doc/clipkit/source.txt >/dev/null && find /opt/clipkit/venv -type f -name '*.so' -print0 | xargs -0 -r ldd > /tmp/taf-clipkit-ldd.txt && ! grep -F 'not found' /tmp/taf-clipkit-ldd.txt >/dev/null", "tmp=/tmp/taf-clipkit-trim-$$; rm -rf \"$tmp\"; mkdir -p \"$tmp\"; cd \"$tmp\"; printf '>s1\\nACGTACGT\\n>s2\\nACGTA-GT\\n>s3\\nACGTA-GT\\n>s4\\nACGTA-GT\\n' > in.fa && clipkit in.fa -m gappy -g 0.5 -o out.fa -of fasta -l -c --report_json report.json --plot_trim_report report.html > run.log 2>&1 && test -s out.fa && test -s out.fa.log && test -s out.fa.complement && test -s report.json && test -s report.html && grep -F '>s1' out.fa >/dev/null && grep -F 'Trimmed alignment: out.fa' run.log >/dev/null && python -c 'import json; data=json.load(open(\"report.json\")); assert data[\"status\"] == \"completed\"; assert data[\"mode\"] == \"gappy\"' && rm -rf \"$tmp\"", "tmp=/tmp/taf-clipkit-validate-$$; rm -rf \"$tmp\"; mkdir -p \"$tmp\"; cd \"$tmp\"; printf '>s1\\nACGTACGTACGT\\n>s2\\nACGTACGTACGT\\n>s3\\nACGTA-GTACGT\\n' > in.fa && clipkit in.fa --validate_only --report_json validate.json > validate.log 2>&1 && test -s validate.json && grep -F 'Validation successful' validate.log >/dev/null && python -c 'import json; data=json.load(open(\"validate.json\")); assert data[\"status\"] == \"validated\"; assert data[\"validate_only\"] is True' && rm -rf \"$tmp\"", "tmp=/tmp/taf-clipkit-ecomp-$$; rm -rf \"$tmp\"; mkdir -p \"$tmp\"; cd \"$tmp\"; cp /opt/clipkit/share/doc/clipkit/test.ecomp in.ecomp && clipkit in.ecomp -o out.fa -of fasta --report_json ecomp.json -q && test -s out.fa && test -s ecomp.json && python -c 'import json; data=json.load(open(\"ecomp.json\")); assert data[\"status\"] == \"completed\"; assert data[\"output_file_format\"] == \"fasta\"' && rm -rf \"$tmp\""]

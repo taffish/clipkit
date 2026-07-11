@@ -1,129 +1,170 @@
 # clipkit
 
-ClipKIT packaged as a TAFFISH tool app.
+`clipkit` packages ClipKIT for TAFFISH. ClipKIT trims multiple sequence
+alignments for phylogenetic and phylogenomic analysis while preserving
+phylogenetically informative sites.
 
-ClipKIT trims multiple sequence alignments for phylogenetic and phylogenomic
-analysis. It keeps phylogenetically informative sites and can remove sites by
-smart-gap, gap-fraction, entropy, composition-bias, heterotachy, parsimony
-informativeness, custom-site, codon-position, and related modes.
+Package identity:
 
-## Package Identity
+- name: `clipkit`
+- command: `taf-clipkit`
+- kind: `tool`
+- version: `2.12.2-r1`
+- image: `ghcr.io/taffish/clipkit:2.12.2-r1`
+- upstream: `JLSteenwyk/ClipKIT` tag `v2.12.2`
+- upstream commit: `fa656cb6532aa3fb4c22ecef3b44721c658e283d`
+- runtime version: `clipkit 2.12.2`
+- TAFFISH app license: Apache-2.0
+- upstream license: MIT
 
-- Name: `clipkit`
-- Command: `taf-clipkit`
-- TAFFISH version: `2.12.0-r1`
-- Kind: `tool`
-- Container image: `ghcr.io/taffish/clipkit:2.12.0-r1`
-- Upstream: `JLSteenwyk/ClipKIT` tag `v2.12.0`
-- Upstream commit: `feb0a07903542f1b6b127b12d42065d93cd9f3e8`
-- Runtime version: `clipkit --version` prints `clipkit 2.12.0`
-- Upstream license: MIT
-- TAFFISH packaging license: Apache-2.0
+## What This App Packages
 
-## What Is Included
+The image installs the official PyPI `clipkit==2.12.2` wheel into a Python 3.11
+virtual environment. The official PyPI source distribution is retained for
+README, package metadata, and license provenance. Both artifacts are pinned by
+SHA-256:
 
-The image installs ClipKIT 2.12.0 into a Python 3.11 virtual environment from
-the PyPI wheel pinned by SHA256:
+| Artifact | SHA-256 |
+| --- | --- |
+| `clipkit-2.12.2-py3-none-any.whl` | `b9074ba75ef0a1217b2c4c7aed36ca927c3664117d59f28a9844cc539c6c0630` |
+| `clipkit-2.12.2.tar.gz` | `bdc1e7f0d8da34e8a8622715de7203edf51da47d8163cc78799b923a7be0e2b4` |
+| upstream `test.ecomp` fixture | `f9f9b2a1084757586a797708a5198156347164516393462a04a5cd624d568065` |
 
-`41bbc7637f34faaeb6d564496bdd41ccd7ce3465219c6b7a4291524520edd4de`
+GitHub release assets and PyPI artifacts are separate builds with different
+digests. This app intentionally uses the PyPI URLs and PyPI-published digests
+listed above; checksums from the GitHub release page must not be substituted.
 
-The upstream PyPI source distribution is also downloaded and pinned by SHA256
-so that upstream README, package metadata and MIT license text can be retained
-in the image:
+Runtime packages remain pinned to the validated Python 3.11 combination:
 
-`e6fa1aa08bff0bf3962c38622ac3193dc9fd7c7adb4341058b34288e97c9ce80`
-
-The upstream `test.ecomp` fixture is downloaded from the same GitHub tag and
-pinned by SHA256 for `.ecomp` smoke coverage:
-
-`f9f9b2a1084757586a797708a5198156347164516393462a04a5cd624d568065`
-
-Runtime Python packages are version-pinned:
-
-- `clipkit==2.12.0`
+- `clipkit==2.12.2`
 - `biopython==1.87`
 - `numpy==1.26.4`
 - `zstandard==0.25.0`
 
-`zstandard` is included because ClipKIT can read Evolutionary Compression
-(`.ecomp`) archives and upstream notes that zstd-encoded `.ecomp` payloads need
-the optional Python module. Other `.ecomp` payload encodings are handled by
-ClipKIT itself.
+`zstandard` is included because zstd-encoded Evolutionary Compression
+(`.ecomp`) archives require the optional module. Other `.ecomp` encodings are
+handled by ClipKIT itself.
+
+## Upstream 2.12.2 Changes
+
+Compared with 2.12.0, upstream now constructs NumPy alignment matrices directly
+from complete sequence strings, counts character states in compact column
+batches, reuses cached gap statistics for smart-gap selection, and materializes
+output rows directly as strings. Upstream reports identical trimming decisions
+with substantially lower runtime and memory on medium and large alignments.
+
+The public CLI, supported formats, trimming modes, and Python dependency bounds
+did not add a new runtime dependency in this update.
+
+## Scope
+
+ClipKIT supports smart-gap, gap-fraction, entropy, composition-bias,
+heterotachy, parsimony-informative, custom-site, codon-position, and related
+trimming modes. It can emit logs, complementary alignments, JSON summaries,
+and standalone HTML trim reports.
+
+This app does not include an aligner, phylogenetic tree inference software,
+model selection, downstream workflows, or reference datasets. Input must
+already be a multiple sequence alignment.
 
 ## Usage
 
-Run ClipKIT's upstream CLI directly:
+Run ClipKIT explicitly through TAFFISH command mode:
 
-```bash
+```sh
 taf-clipkit clipkit alignment.fa -o alignment.clipkit.fa
 taf-clipkit clipkit alignment.fa -m smart-gap -o smart-gap.fa
 taf-clipkit clipkit alignment.fa -m gappy -g 0.8 -o gappy.fa
 taf-clipkit clipkit alignment.fa -m kpic -o kpic.fa
 taf-clipkit clipkit alignment.fa -m c3 -co -o no-third-codon.fa
-taf-clipkit clipkit alignment.fa -l --report_json report.json --plot_trim_report report.html
 taf-clipkit clipkit archive.ecomp -of fasta -o trimmed.fa
 ```
 
-Wrapper help and upstream help are different:
+Generate provenance and report outputs:
 
-```bash
+```sh
+taf-clipkit clipkit alignment.fa -l -c \
+  --report_json report.json \
+  --plot_trim_report report.html \
+  -o trimmed.fa
+```
+
+Access wrapper and upstream help:
+
+```sh
 taf-clipkit --help
 taf-clipkit -- --help
 taf-clipkit clipkit --help
 taf-clipkit -- --version
 ```
 
-Because this is a normal tool app, TAFFISH command mode is enabled. You can
-also run tools in the same container environment explicitly:
+## Command Mode
 
-```bash
-taf-clipkit clipkit --version
-taf-clipkit python -c 'import clipkit; print("ok")'
+The upstream CLI requires its input alignment as the first positional argument.
+Because TAFFISH automatic command mode treats a first non-option argument as an
+executable, use:
+
+```sh
+taf-clipkit clipkit alignment.fa -o trimmed.fa
 ```
 
-ClipKIT's upstream CLI requires the input alignment as the first positional
-argument. With TAFFISH command mode enabled, `taf-clipkit alignment.fa ...`
-means "run an executable named `alignment.fa` inside the container". Use the
-explicit command-mode form `taf-clipkit clipkit alignment.fa ...` for normal
-trimming. Use `taf-clipkit -- --help` and `taf-clipkit -- --version` only for
-option-leading upstream calls.
+Do not use `taf-clipkit alignment.fa ...`; that would try to execute a program
+named `alignment.fa`. Explicit command mode also exposes the packaged Python
+interpreter for script files:
 
-## Boundaries
+```sh
+taf-clipkit python analysis.py
+```
 
-This package exposes ClipKIT itself plus the Python runtime needed by its
-documented formats. It does not include multiple-sequence aligners, tree
-inference tools, model-selection tools, downstream phylogenomic workflows, or
-reference datasets.
+## Inputs and Outputs
 
-ClipKIT works on existing alignments; it does not create the alignment. For raw
-sequences, first align them with a separate tool such as MAFFT, MUSCLE, or
-another aligner, then pass the aligned file to `taf-clipkit clipkit`.
+ClipKIT accepts FASTA, Clustal, MAF, Mauve, PHYLIP, Stockholm, and `.ecomp`
+alignments through its upstream parsers. Output defaults to the input format;
+use `-of fasta` or another supported format to override it.
 
-ClipKIT supports FASTA, Clustal, MAF, Mauve, PHYLIP, Stockholm, and `.ecomp`
-formats through its upstream parser. Output format defaults to the input
-format; use `-of fasta` or another supported format when a different output
-format is needed.
+Depending on options, ClipKIT writes the trimmed alignment, a per-site log,
+the removed-site complementary alignment, JSON run metadata, and an HTML trim
+report. Outputs are ordinary user files in the selected working directory.
 
-The smoke tests cover version binding, upstream help, Python imports,
-dynamic-library sanity, source checksum provenance, a real FASTA trimming path
-with log/complement/JSON/HTML-report output, validate-only mode, and `.ecomp`
-input converted to FASTA. They do not replace biological validation of every
-trimming mode on large production alignments.
+## Platform and Resources
 
-## Reproducibility
+The app targets native `linux/amd64` and `linux/arm64`. The Python package is
+architecture-neutral; NumPy, Biopython, and zstandard provide compiled wheels
+for both declared platforms. Memory use scales with alignment cells. ClipKIT
+2.12.2 specifically reduces construction and counting overhead for larger MSAs.
 
-- Upstream repository: `https://github.com/JLSteenwyk/ClipKIT`
-- Upstream release: `https://github.com/JLSteenwyk/ClipKIT/releases/tag/v2.12.0`
-- Upstream tag: `v2.12.0`
-- Upstream tag commit: `feb0a07903542f1b6b127b12d42065d93cd9f3e8`
-- Upstream wheel used by this image: PyPI `clipkit-2.12.0-py3-none-any.whl`
-- Wheel SHA256: `41bbc7637f34faaeb6d564496bdd41ccd7ce3465219c6b7a4291524520edd4de`
-- Upstream source used for docs: PyPI `clipkit-2.12.0.tar.gz`
-- Source SHA256: `e6fa1aa08bff0bf3962c38622ac3193dc9fd7c7adb4341058b34288e97c9ce80`
-- Upstream `.ecomp` fixture: `https://raw.githubusercontent.com/JLSteenwyk/ClipKIT/v2.12.0/test.ecomp`
-- Fixture SHA256: `f9f9b2a1084757586a797708a5198156347164516393462a04a5cd624d568065`
-- Build base: `python:3.11-slim-bookworm`
-- Native platforms: `linux/amd64`, `linux/arm64`
-- Citation: Steenwyk et al. ClipKIT: a multiple sequence alignment trimming
-  software for accurate phylogenomic inference. PLOS Biology, 2020.
-- DOI: `10.1371/journal.pbio.3001007`
+No network, database, model, or external reference is needed at runtime.
+
+## Testing
+
+Independent offline smoke covers:
+
+- exact ClipKIT version, Python imports, source provenance, and native libraries
+- real FASTA trimming with log, complement, JSON, and HTML report outputs
+- validate-only mode and `.ecomp` decoding to FASTA
+- a deterministic matrix above one million alignment cells that exercises the
+  new batched count path and checks gap, entropy, composition, and frequency
+  results
+
+Dockerfile build-time checks intentionally use only a tiny alignment and normal
+CLI markers. The larger optimization-path test and HTML report generation stay
+in runtime smoke so multi-architecture buildx/QEMU builds are not burdened by
+unnecessarily strong build-time tests.
+
+Smoke validates packaging and representative execution, not every mode or
+biological interpretation on production alignments.
+
+## License and Citation
+
+The TAFFISH app packaging is Apache-2.0. ClipKIT retains its MIT license, whose
+text is included in the image.
+
+Please cite Steenwyk et al., *ClipKIT: a multiple sequence alignment trimming
+software for accurate phylogenomic inference*, PLOS Biology (2020), DOI
+`10.1371/journal.pbio.3001007`.
+
+Upstream resources:
+
+- <https://github.com/JLSteenwyk/ClipKIT>
+- <https://github.com/JLSteenwyk/ClipKIT/releases/tag/v2.12.2>
+- <https://jlsteenwyk.com/ClipKIT/>

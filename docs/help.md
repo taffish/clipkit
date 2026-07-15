@@ -1,7 +1,7 @@
-taf-clipkit 2.12.2-r1
+taf-clipkit 2.13.0-r1
 
 Purpose:
-  Run ClipKIT 2.12.2 to trim existing multiple sequence alignments for
+  Run ClipKIT 2.13.0 to trim existing multiple sequence alignments for
   phylogenetic and phylogenomic analysis.
 
 Usage:
@@ -17,6 +17,8 @@ Common workflows:
   taf-clipkit clipkit alignment.fa -m kpic -o kpic.fa
   taf-clipkit clipkit codon.fa -m c3 -co -o no-third-codon.fa
   taf-clipkit clipkit archive.ecomp -of fasta -o trimmed.fa
+  taf-clipkit clipkit coding.fa -m gappy -g 0.9 -s nt -co \
+    --remove_stop_codons all --report_json stops.json -o coding.masked.fa
 
 Reports and provenance:
   taf-clipkit clipkit alignment.fa -l -c --report_json report.json \
@@ -33,6 +35,7 @@ Main upstream options:
   -l, --log                     Write a per-site log.
   -c, --complementary           Write trimmed-away sites.
   -co, --codon                  Trim codons as units.
+  --remove_stop_codons MODE     Mask terminal, internal or all in-frame stops.
   -eo, --ends_only              Trim only alignment ends.
   -t, --threads N               Request a thread count.
   --dry_run                     Compute without writing normal outputs.
@@ -51,7 +54,8 @@ Inputs:
 
 Key outputs:
   Trimmed alignment, optional per-site log and complementary alignment,
-  optional JSON summary, and optional HTML trim report.
+  optional JSON summary, and optional HTML trim report. Stop-codon masking
+  counts are reported in runtime, log and JSON output when enabled.
 
 Command mode:
   Use "taf-clipkit clipkit alignment.fa ..." for normal trimming.
@@ -60,10 +64,10 @@ Command mode:
   The packaged environment also exposes Python for script files:
     taf-clipkit python analysis.py
 
-Version 2.12.2:
-  Upstream accelerates alignment construction, batched column statistics,
-  smart-gap statistics reuse, and output materialization without changing the
-  public CLI or trimming decisions.
+Version 2.13.0:
+  --remove_stop_codons masks terminal, internal or all in-frame DNA/RNA stop
+  codons before trimming. It requires nucleotide input, codon mode and an
+  alignment length divisible by three. Masking is disabled by default.
 
 Platform and resources:
   Native linux/amd64 and linux/arm64 are supported.

@@ -1,11 +1,11 @@
-ARG CLIPKIT_VERSION=2.12.2
-ARG CLIPKIT_TAG=v2.12.2
-ARG CLIPKIT_COMMIT=fa656cb6532aa3fb4c22ecef3b44721c658e283d
-ARG CLIPKIT_WHEEL_URL=https://files.pythonhosted.org/packages/e8/d7/e5920b04122002d77f9c3026d0fa0c94c24e276b6b1f02a0405039e0e10a/clipkit-2.12.2-py3-none-any.whl
-ARG CLIPKIT_WHEEL_SHA256=b9074ba75ef0a1217b2c4c7aed36ca927c3664117d59f28a9844cc539c6c0630
-ARG CLIPKIT_SDIST_URL=https://files.pythonhosted.org/packages/1d/cc/5cc05e2117f097ab8aab447b968d2d3f188b1fcc3c8c6b49d2c23ae4b2dc/clipkit-2.12.2.tar.gz
-ARG CLIPKIT_SDIST_SHA256=bdc1e7f0d8da34e8a8622715de7203edf51da47d8163cc78799b923a7be0e2b4
-ARG CLIPKIT_ECOMP_URL=https://raw.githubusercontent.com/JLSteenwyk/ClipKIT/v2.12.2/test.ecomp
+ARG CLIPKIT_VERSION=2.13.0
+ARG CLIPKIT_TAG=v2.13.0
+ARG CLIPKIT_COMMIT=fb95e1b0d376cf3d03550666b550e704d253540a
+ARG CLIPKIT_WHEEL_URL=https://files.pythonhosted.org/packages/16/08/14f7ca7a174a00a53101b238642294db31c28c1fbecd5e16e86a60ce309d/clipkit-2.13.0-py3-none-any.whl
+ARG CLIPKIT_WHEEL_SHA256=4b52400df748d6d0ee7bb5e133465bd8ae5c7cc1fb95698896bce5e323ca4495
+ARG CLIPKIT_SDIST_URL=https://files.pythonhosted.org/packages/2d/86/dd1ddead7d37e834724d17a8bda9ffc8afe5aeceb453abbfdaed505b1873/clipkit-2.13.0.tar.gz
+ARG CLIPKIT_SDIST_SHA256=a766e67e04d495ec17f635cf9904a802b6a552f2a6b09586252539ed9f862c56
+ARG CLIPKIT_ECOMP_URL=https://raw.githubusercontent.com/JLSteenwyk/ClipKIT/v2.13.0/test.ecomp
 ARG CLIPKIT_ECOMP_SHA256=f9f9b2a1084757586a797708a5198156347164516393462a04a5cd624d568065
 
 FROM python:3.11-slim-bookworm AS builder
@@ -69,7 +69,6 @@ RUN set -eux; \
     download "${CLIPKIT_ECOMP_URL}" /opt/clipkit/share/doc/clipkit/test.ecomp; \
     echo "${CLIPKIT_ECOMP_SHA256}  /opt/clipkit/share/doc/clipkit/test.ecomp" | sha256sum -c -; \
     install -m 0644 clipkit-src/LICENSE.md /opt/clipkit/share/licenses/clipkit/LICENSE.md; \
-    python -m pip freeze | sort > /opt/clipkit/share/doc/clipkit/python-packages.txt; \
     { \
       echo "name=ClipKIT"; \
       echo "version=${CLIPKIT_VERSION}"; \
@@ -85,12 +84,15 @@ RUN set -eux; \
     } > /opt/clipkit/share/doc/clipkit/source.txt; \
     clipkit --version | grep -Fx "clipkit ${CLIPKIT_VERSION}" >/dev/null; \
     clipkit --help 2>&1 | grep -F "Usage: clipkit <input>" >/dev/null; \
+    clipkit --help 2>&1 | grep -F "remove_stop_codons" >/dev/null; \
     python -c "import Bio, clipkit, numpy, zstandard; from clipkit.version import __version__; assert __version__ == '${CLIPKIT_VERSION}'"; \
     find /opt/clipkit/venv -type f -name '*.so' -print0 | xargs -0 -r ldd > /tmp/clipkit-ldd.txt; \
     if grep -F "not found" /tmp/clipkit-ldd.txt; then exit 1; fi; \
     python -m pip uninstall -y pip setuptools wheel packaging; \
     find /opt/clipkit -type d -name '__pycache__' -prune -exec rm -rf '{}' +; \
-    find /opt/clipkit -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete
+    find /opt/clipkit -type f -name '*.a' -delete; \
+    find /opt/clipkit -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete; \
+    python -c 'import importlib.metadata as m; rows = sorted("{}=={}".format(d.metadata["Name"], d.version) for d in m.distributions() if d.metadata["Name"]); open("/opt/clipkit/share/doc/clipkit/python-packages.txt", "w").write("\n".join(rows) + "\n")'
 
 FROM python:3.11-slim-bookworm
 
@@ -113,6 +115,7 @@ RUN set -eux; \
     command -v ldd >/dev/null; \
     clipkit --version | grep -Fx "clipkit ${CLIPKIT_VERSION}" >/dev/null; \
     clipkit --help 2>&1 | grep -F "Usage: clipkit <input>" >/dev/null; \
+    clipkit --help 2>&1 | grep -F "remove_stop_codons" >/dev/null; \
     grep -F "commit=${CLIPKIT_COMMIT}" /opt/clipkit/share/doc/clipkit/source.txt >/dev/null; \
     python -c "import Bio, clipkit, numpy, zstandard; from clipkit.version import __version__; assert __version__ == '${CLIPKIT_VERSION}'"; \
     find /opt/clipkit/venv -type f -name '*.so' -print0 | xargs -0 -r ldd > /tmp/clipkit-ldd.txt; \

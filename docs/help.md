@@ -1,7 +1,7 @@
-taf-clipkit 2.13.0-r1
+taf-clipkit 2.13.1-r1
 
 Purpose:
-  Run ClipKIT 2.13.0 to trim existing multiple sequence alignments for
+  Run ClipKIT 2.13.1 to trim existing multiple sequence alignments for
   phylogenetic and phylogenomic analysis.
 
 Usage:
@@ -64,7 +64,13 @@ Command mode:
   The packaged environment also exposes Python for script files:
     taf-clipkit python analysis.py
 
-Version 2.13.0:
+Version 2.13.1:
+  This performance patch preserves existing trimming behavior and public APIs.
+  It reduces repeated column counting in gappy/smart-gap and KPI/KPIC combined
+  modes, while preserving mixed-case behavior. Stop-codon, entropy,
+  composition-bias and codon-site paths are also faster.
+
+Stop-codon masking since 2.13.0:
   --remove_stop_codons masks terminal, internal or all in-frame DNA/RNA stop
   codons before trimming. It requires nucleotide input, codon mode and an
   alignment length divisible by three. Masking is disabled by default.

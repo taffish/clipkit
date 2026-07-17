@@ -9,25 +9,25 @@ Package identity:
 - name: `clipkit`
 - command: `taf-clipkit`
 - kind: `tool`
-- version: `2.13.0-r1`
-- image: `ghcr.io/taffish/clipkit:2.13.0-r1`
-- upstream: `JLSteenwyk/ClipKIT` tag `v2.13.0`
-- upstream commit: `fb95e1b0d376cf3d03550666b550e704d253540a`
-- runtime version: `clipkit 2.13.0`
+- version: `2.13.1-r1`
+- image: `ghcr.io/taffish/clipkit:2.13.1-r1`
+- upstream: `JLSteenwyk/ClipKIT` tag `v2.13.1`
+- upstream commit: `f23400a20da3ad69908fd48f5786f8bb626f8bbd`
+- runtime version: `clipkit 2.13.1`
 - TAFFISH app license: Apache-2.0
 - upstream license: MIT
 
 ## What This App Packages
 
-The image installs the official PyPI `clipkit==2.13.0` wheel into a Python 3.11
+The image installs the official PyPI `clipkit==2.13.1` wheel into a Python 3.11
 virtual environment. The official PyPI source distribution is retained for
 README, package metadata, and license provenance. Both artifacts are pinned by
 SHA-256:
 
 | Artifact | SHA-256 |
 | --- | --- |
-| `clipkit-2.13.0-py3-none-any.whl` | `4b52400df748d6d0ee7bb5e133465bd8ae5c7cc1fb95698896bce5e323ca4495` |
-| `clipkit-2.13.0.tar.gz` | `a766e67e04d495ec17f635cf9904a802b6a552f2a6b09586252539ed9f862c56` |
+| `clipkit-2.13.1-py3-none-any.whl` | `f3d5736fcfc3988e87aa198bd0d2eb3d41315724b26c0c35276bf16bdd5569fb` |
+| `clipkit-2.13.1.tar.gz` | `89a4f5a6cc0b7a0cc9681d83d6ba504d75b17b3a304990dcabe0141a85b8e27c` |
 | upstream `test.ecomp` fixture | `f9f9b2a1084757586a797708a5198156347164516393462a04a5cd624d568065` |
 
 GitHub release assets and PyPI artifacts are separate builds with different
@@ -36,7 +36,7 @@ listed above; checksums from the GitHub release page must not be substituted.
 
 Runtime packages remain pinned to the validated Python 3.11 combination:
 
-- `clipkit==2.13.0`
+- `clipkit==2.13.1`
 - `biopython==1.87`
 - `numpy==1.26.4`
 - `zstandard==0.25.0`
@@ -45,13 +45,26 @@ Runtime packages remain pinned to the validated Python 3.11 combination:
 (`.ecomp`) archives require the optional module. Other `.ecomp` encodings are
 handled by ClipKIT itself.
 
-## Upstream 2.13.0 Changes
+## Upstream 2.13.1 Changes
 
-ClipKIT 2.13.0 adds opt-in masking of terminal, internal, or all in-frame stop
-codons before alignment statistics and codon-aware trimming. The CLI option is
+ClipKIT 2.13.1 is a performance-focused patch that preserves existing
+trimming behavior and public APIs. It reduces repeated column-count passes in
+gappy, smart-gap, KPI, and KPIC modes. Uppercase combined modes reuse exact
+classification counts, while mixed-case alignments keep separate raw and
+case-normalized handling so their established behavior is preserved.
+
+The patch also accelerates stop-codon masking, entropy and composition-bias
+scoring, and codon-site expansion. Upstream reports identical outputs and
+metadata across its expanded 104-case reproducibility suite.
+
+The stop-codon feature introduced in 2.13.0 remains available unchanged.
+ClipKIT can opt in to masking terminal, internal, or all in-frame stop codons
+before alignment statistics and codon-aware trimming. The CLI option is
 `--remove_stop_codons {terminal,internal,all}`; the Python API accepts the same
-three values. DNA and RNA stop codons are recognized case-insensitively, and
-terminal stops may be followed by trailing gap codons.
+three values.
+
+DNA and RNA stop codons are recognized case-insensitively, and terminal stops
+may be followed by trailing gap codons.
 
 The feature requires nucleotide input, codon-aware processing, and an alignment
 length divisible by three. Runtime text, log files, JSON reports, and Python API
@@ -140,7 +153,7 @@ directory.
 The app targets native `linux/amd64` and `linux/arm64`. The Python package is
 architecture-neutral; NumPy, Biopython, and zstandard provide compiled wheels
 for both declared platforms. Memory use scales with alignment cells. ClipKIT
-retains the 2.12.2 construction and counting optimizations for larger MSAs.
+includes the 2.13.1 counting and scoring optimizations for larger MSAs.
 
 No network, database, model, or external reference is needed at runtime.
 
@@ -153,8 +166,10 @@ Independent offline smoke covers:
   and JSON counts
 - real FASTA trimming with log, complement, JSON, and HTML report outputs
 - validate-only mode and `.ecomp` decoding to FASTA
+- uppercase and mixed-case `kpic-gappy` output equivalence across the new
+  shared-count and separate raw/normalized-count paths
 - a deterministic matrix above one million alignment cells that exercises the
-  new batched count path and checks gap, entropy, composition, and frequency
+  batched count path and checks gap, entropy, composition, and frequency
   results
 
 Dockerfile build-time checks intentionally use only normal CLI markers and a
@@ -177,5 +192,5 @@ software for accurate phylogenomic inference*, PLOS Biology (2020), DOI
 Upstream resources:
 
 - <https://github.com/JLSteenwyk/ClipKIT>
-- <https://github.com/JLSteenwyk/ClipKIT/releases/tag/v2.13.0>
+- <https://github.com/JLSteenwyk/ClipKIT/releases/tag/v2.13.1>
 - <https://jlsteenwyk.com/ClipKIT/>

@@ -9,25 +9,25 @@ Package identity:
 - name: `clipkit`
 - command: `taf-clipkit`
 - kind: `tool`
-- version: `2.13.1-r1`
-- image: `ghcr.io/taffish/clipkit:2.13.1-r1`
-- upstream: `JLSteenwyk/ClipKIT` tag `v2.13.1`
-- upstream commit: `f23400a20da3ad69908fd48f5786f8bb626f8bbd`
-- runtime version: `clipkit 2.13.1`
+- version: `2.13.2-r1`
+- image: `ghcr.io/taffish/clipkit:2.13.2-r1`
+- upstream: `JLSteenwyk/ClipKIT` tag `v2.13.2`
+- upstream commit: `b88577494b523ea57a5d6ef56e4bb2ed2efafe56`
+- runtime version: `clipkit 2.13.2`
 - TAFFISH app license: Apache-2.0
 - upstream license: MIT
 
 ## What This App Packages
 
-The image installs the official PyPI `clipkit==2.13.1` wheel into a Python 3.11
+The image installs the official PyPI `clipkit==2.13.2` wheel into a Python 3.11
 virtual environment. The official PyPI source distribution is retained for
 README, package metadata, and license provenance. Both artifacts are pinned by
 SHA-256:
 
 | Artifact | SHA-256 |
 | --- | --- |
-| `clipkit-2.13.1-py3-none-any.whl` | `f3d5736fcfc3988e87aa198bd0d2eb3d41315724b26c0c35276bf16bdd5569fb` |
-| `clipkit-2.13.1.tar.gz` | `89a4f5a6cc0b7a0cc9681d83d6ba504d75b17b3a304990dcabe0141a85b8e27c` |
+| `clipkit-2.13.2-py3-none-any.whl` | `a609656ad6b373e8455a6875cbfa369b34d322197230a7385ddfd25c507b36e0` |
+| `clipkit-2.13.2.tar.gz` | `66dec68f631b9e4b46cd29648621bab645a720e852e11e8d8f675ea5b4954afe` |
 | upstream `test.ecomp` fixture | `f9f9b2a1084757586a797708a5198156347164516393462a04a5cd624d568065` |
 
 GitHub release assets and PyPI artifacts are separate builds with different
@@ -36,7 +36,7 @@ listed above; checksums from the GitHub release page must not be substituted.
 
 Runtime packages remain pinned to the validated Python 3.11 combination:
 
-- `clipkit==2.13.1`
+- `clipkit==2.13.2`
 - `biopython==1.87`
 - `numpy==1.26.4`
 - `zstandard==0.25.0`
@@ -45,17 +45,24 @@ Runtime packages remain pinned to the validated Python 3.11 combination:
 (`.ecomp`) archives require the optional module. Other `.ecomp` encodings are
 handled by ClipKIT itself.
 
-## Upstream 2.13.1 Changes
+## Upstream 2.13.2 Changes
 
-ClipKIT 2.13.1 is a performance-focused patch that preserves existing
-trimming behavior and public APIs. It reduces repeated column-count passes in
-gappy, smart-gap, KPI, and KPIC modes. Uppercase combined modes reuse exact
-classification counts, while mixed-case alignments keep separate raw and
-case-normalized handling so their established behavior is preserved.
+ClipKIT 2.13.2 is a release-quality and test-coverage update. Upstream states
+that it does not modify production behavior; comparison of the published
+package sources confirms that production code differs from 2.13.1 only in the
+reported version. Public CLI and Python APIs, dependency bounds, formats, and
+runtime requirements are unchanged.
 
-The patch also accelerates stop-codon masking, entropy and composition-bias
-scoring, and codon-site expansion. Upstream reports identical outputs and
-metadata across its expanded 104-case reproducibility suite.
+Upstream expanded its suite from 552 to 619 tests and reports line coverage
+increasing from 84.53% to 98.83%. New coverage exercises public APIs, CLI
+validation, file and report output, malformed inputs, reusable in-process
+execution, ECOMP archives, smart-gap and gappyout boundaries, and benchmark
+orchestration.
+
+The performance improvements introduced in 2.13.1 remain in place, including
+reduced repeated column-count passes in gappy, smart-gap, KPI, and KPIC modes,
+plus faster stop-codon masking, entropy and composition-bias scoring, and
+codon-site expansion.
 
 The stop-codon feature introduced in 2.13.0 remains available unchanged.
 ClipKIT can opt in to masking terminal, internal, or all in-frame stop codons
@@ -70,7 +77,7 @@ The feature requires nucleotide input, codon-aware processing, and an alignment
 length divisible by three. Runtime text, log files, JSON reports, and Python API
 results expose terminal, internal, and total masked-stop counts. Masking remains
 disabled unless requested. Dependency bounds and external runtime requirements
-are unchanged from 2.12.2.
+remain unchanged in 2.13.2.
 
 ## Scope
 
@@ -153,7 +160,7 @@ directory.
 The app targets native `linux/amd64` and `linux/arm64`. The Python package is
 architecture-neutral; NumPy, Biopython, and zstandard provide compiled wheels
 for both declared platforms. Memory use scales with alignment cells. ClipKIT
-includes the 2.13.1 counting and scoring optimizations for larger MSAs.
+retains the 2.13.1 counting and scoring optimizations for larger MSAs.
 
 No network, database, model, or external reference is needed at runtime.
 
@@ -177,6 +184,10 @@ tiny alignment. Stop-codon output assertions, the larger optimization-path
 test, and HTML report generation stay in runtime smoke so multi-architecture
 buildx/QEMU builds are not burdened by unnecessarily strong build-time tests.
 
+Because 2.13.2 changes upstream tests and release metadata rather than
+production behavior, this release preserves the complete 2.13.1 smoke surface
+instead of adding redundant build-time work.
+
 Smoke validates packaging and representative execution, not every mode or
 biological interpretation on production alignments.
 
@@ -192,5 +203,5 @@ software for accurate phylogenomic inference*, PLOS Biology (2020), DOI
 Upstream resources:
 
 - <https://github.com/JLSteenwyk/ClipKIT>
-- <https://github.com/JLSteenwyk/ClipKIT/releases/tag/v2.13.1>
+- <https://github.com/JLSteenwyk/ClipKIT/releases/tag/v2.13.2>
 - <https://jlsteenwyk.com/ClipKIT/>

@@ -1,0 +1,2 @@
+<taf-app:container:ghcr.io/taffish/clipkit:2.14.0-r1>
+clipkit ::*ARGV*::

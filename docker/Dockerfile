@@ -1,11 +1,11 @@
-ARG CLIPKIT_VERSION=2.13.2
-ARG CLIPKIT_TAG=v2.13.2
-ARG CLIPKIT_COMMIT=b88577494b523ea57a5d6ef56e4bb2ed2efafe56
-ARG CLIPKIT_WHEEL_URL=https://files.pythonhosted.org/packages/8d/b7/253dcf9e7b34f68d54034aca72878378e2c56329b3d9f2f03c3beaf7ec12/clipkit-2.13.2-py3-none-any.whl
-ARG CLIPKIT_WHEEL_SHA256=a609656ad6b373e8455a6875cbfa369b34d322197230a7385ddfd25c507b36e0
-ARG CLIPKIT_SDIST_URL=https://files.pythonhosted.org/packages/b5/b0/12f8298a64dabd786d0526aea5af4b90e60b1de1520a1f1ce4781a5ca6f8/clipkit-2.13.2.tar.gz
-ARG CLIPKIT_SDIST_SHA256=66dec68f631b9e4b46cd29648621bab645a720e852e11e8d8f675ea5b4954afe
-ARG CLIPKIT_ECOMP_URL=https://raw.githubusercontent.com/JLSteenwyk/ClipKIT/v2.13.2/test.ecomp
+ARG CLIPKIT_VERSION=2.14.0
+ARG CLIPKIT_TAG=v2.14.0
+ARG CLIPKIT_COMMIT=dd74f453fffaa768d20edf8109a75e14982312d0
+ARG CLIPKIT_WHEEL_URL=https://files.pythonhosted.org/packages/3e/02/dfadf6b2b7f72f5f508643a74680b16c3fa2c0f5437c3287ea7dc8f15389/clipkit-2.14.0-py3-none-any.whl
+ARG CLIPKIT_WHEEL_SHA256=475e89193015b5bd0acdff39f2ea282fbfd96a4452d4d6b36e7ecc9e4c3caf9b
+ARG CLIPKIT_SDIST_URL=https://files.pythonhosted.org/packages/e0/ac/0931a4aa936835eec9cc95c1cac40377a12e1e727d83843278c5e8adb331/clipkit-2.14.0.tar.gz
+ARG CLIPKIT_SDIST_SHA256=59df8f19d61171c173b7d5cfae29282d8aab79df6671e4f5a08b701b445788e1
+ARG CLIPKIT_ECOMP_URL=https://raw.githubusercontent.com/JLSteenwyk/ClipKIT/v2.14.0/test.ecomp
 ARG CLIPKIT_ECOMP_SHA256=f9f9b2a1084757586a797708a5198156347164516393462a04a5cd624d568065
 
 FROM python:3.11-slim-bookworm AS builder
@@ -85,7 +85,8 @@ RUN set -eux; \
     clipkit --version | grep -Fx "clipkit ${CLIPKIT_VERSION}" >/dev/null; \
     clipkit --help 2>&1 | grep -F "Usage: clipkit <input>" >/dev/null; \
     clipkit --help 2>&1 | grep -F "remove_stop_codons" >/dev/null; \
-    python -c "import Bio, clipkit, numpy, zstandard; from clipkit.version import __version__; assert __version__ == '${CLIPKIT_VERSION}'"; \
+    clipkit --help 2>&1 | grep -F "ambiguity_handling" >/dev/null; \
+    python -c "import Bio, clipkit, numpy, zstandard; from clipkit.modes import AmbiguityHandling; from clipkit.version import __version__; assert __version__ == '${CLIPKIT_VERSION}'; assert AmbiguityHandling.missing.value == 'missing'"; \
     find /opt/clipkit/venv -type f -name '*.so' -print0 | xargs -0 -r ldd > /tmp/clipkit-ldd.txt; \
     if grep -F "not found" /tmp/clipkit-ldd.txt; then exit 1; fi; \
     python -m pip uninstall -y pip setuptools wheel packaging; \
@@ -116,8 +117,9 @@ RUN set -eux; \
     clipkit --version | grep -Fx "clipkit ${CLIPKIT_VERSION}" >/dev/null; \
     clipkit --help 2>&1 | grep -F "Usage: clipkit <input>" >/dev/null; \
     clipkit --help 2>&1 | grep -F "remove_stop_codons" >/dev/null; \
+    clipkit --help 2>&1 | grep -F "ambiguity_handling" >/dev/null; \
     grep -F "commit=${CLIPKIT_COMMIT}" /opt/clipkit/share/doc/clipkit/source.txt >/dev/null; \
-    python -c "import Bio, clipkit, numpy, zstandard; from clipkit.version import __version__; assert __version__ == '${CLIPKIT_VERSION}'"; \
+    python -c "import Bio, clipkit, numpy, zstandard; from clipkit.modes import AmbiguityHandling; from clipkit.version import __version__; assert __version__ == '${CLIPKIT_VERSION}'; assert AmbiguityHandling.missing.value == 'missing'"; \
     find /opt/clipkit/venv -type f -name '*.so' -print0 | xargs -0 -r ldd > /tmp/clipkit-ldd.txt; \
     if grep -F "not found" /tmp/clipkit-ldd.txt; then exit 1; fi; \
     mkdir -p /tmp/clipkit-check; \

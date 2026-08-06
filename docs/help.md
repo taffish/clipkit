@@ -1,7 +1,7 @@
-taf-clipkit 2.13.2-r1
+taf-clipkit 2.14.0-r1
 
 Purpose:
-  Run ClipKIT 2.13.2 to trim existing multiple sequence alignments for
+  Run ClipKIT 2.14.0 to trim existing multiple sequence alignments for
   phylogenetic and phylogenomic analysis.
 
 Usage:
@@ -15,14 +15,12 @@ Common workflows:
   taf-clipkit clipkit alignment.fa -m smart-gap -o smart-gap.fa
   taf-clipkit clipkit alignment.fa -m gappy -g 0.8 -o gappy.fa
   taf-clipkit clipkit alignment.fa -m kpic -o kpic.fa
+  taf-clipkit clipkit ambiguous.fa -s nt --ambiguity_handling fractional \
+    -o ambiguity-aware.fa
   taf-clipkit clipkit codon.fa -m c3 -co -o no-third-codon.fa
   taf-clipkit clipkit archive.ecomp -of fasta -o trimmed.fa
   taf-clipkit clipkit coding.fa -m gappy -g 0.9 -s nt -co \
     --remove_stop_codons all --report_json stops.json -o coding.masked.fa
-
-Reports and provenance:
-  taf-clipkit clipkit alignment.fa -l -c --report_json report.json \
-    --plot_trim_report report.html -o trimmed.fa
 
 Main upstream options:
   -o, --output FILE             Output alignment.
@@ -31,6 +29,7 @@ Main upstream options:
   -if, --input_file_format FMT  Override input format detection.
   -of, --output_file_format FMT Select output format.
   -s, --sequence_type nt|aa     Set sequence type.
+  --ambiguity_handling MODE     Use missing, fractional or literal IUPAC policy.
   -a, --auxiliary_file FILE     Auxiliary input for modes such as cst.
   -l, --log                     Write a per-site log.
   -c, --complementary           Write trimmed-away sites.
@@ -64,16 +63,12 @@ Command mode:
   The packaged environment also exposes Python for script files:
     taf-clipkit python analysis.py
 
-Version 2.13.2:
-  This release expands upstream behavioral and regression test coverage without
-  changing production behavior, public APIs, formats or dependency bounds.
-  The gappy/smart-gap, KPI/KPIC, stop-codon, entropy, composition-bias and
-  codon-site optimizations introduced in 2.13.1 remain available.
-
-Stop-codon masking since 2.13.0:
-  --remove_stop_codons masks terminal, internal or all in-frame DNA/RNA stop
-  codons before trimming. It requires nucleotide input, codon mode and an
-  alignment length divisible by three. Masking is disabled by default.
+Version 2.14.0:
+  IUPAC ambiguity handling is explicit in the CLI, Python API, JSON and HTML
+  reports. "missing" is the conservative default, "fractional" distributes
+  symbols across possible states for supported statistics, and "literal"
+  preserves the pre-2.14 interpretation. Configured gap characters take
+  precedence and alignment symbols are not rewritten.
 
 Platform and resources:
   Native linux/amd64 and linux/arm64 are supported.

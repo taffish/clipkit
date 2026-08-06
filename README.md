@@ -9,25 +9,25 @@ Package identity:
 - name: `clipkit`
 - command: `taf-clipkit`
 - kind: `tool`
-- version: `2.13.2-r1`
-- image: `ghcr.io/taffish/clipkit:2.13.2-r1`
-- upstream: `JLSteenwyk/ClipKIT` tag `v2.13.2`
-- upstream commit: `b88577494b523ea57a5d6ef56e4bb2ed2efafe56`
-- runtime version: `clipkit 2.13.2`
+- version: `2.14.0-r1`
+- image: `ghcr.io/taffish/clipkit:2.14.0-r1`
+- upstream: `JLSteenwyk/ClipKIT` tag `v2.14.0`
+- upstream commit: `dd74f453fffaa768d20edf8109a75e14982312d0`
+- runtime version: `clipkit 2.14.0`
 - TAFFISH app license: Apache-2.0
 - upstream license: MIT
 
 ## What This App Packages
 
-The image installs the official PyPI `clipkit==2.13.2` wheel into a Python 3.11
+The image installs the official PyPI `clipkit==2.14.0` wheel into a Python 3.11
 virtual environment. The official PyPI source distribution is retained for
 README, package metadata, and license provenance. Both artifacts are pinned by
 SHA-256:
 
 | Artifact | SHA-256 |
 | --- | --- |
-| `clipkit-2.13.2-py3-none-any.whl` | `a609656ad6b373e8455a6875cbfa369b34d322197230a7385ddfd25c507b36e0` |
-| `clipkit-2.13.2.tar.gz` | `66dec68f631b9e4b46cd29648621bab645a720e852e11e8d8f675ea5b4954afe` |
+| `clipkit-2.14.0-py3-none-any.whl` | `475e89193015b5bd0acdff39f2ea282fbfd96a4452d4d6b36e7ecc9e4c3caf9b` |
+| `clipkit-2.14.0.tar.gz` | `59df8f19d61171c173b7d5cfae29282d8aab79df6671e4f5a08b701b445788e1` |
 | upstream `test.ecomp` fixture | `f9f9b2a1084757586a797708a5198156347164516393462a04a5cd624d568065` |
 
 GitHub release assets and PyPI artifacts are separate builds with different
@@ -36,7 +36,7 @@ listed above; checksums from the GitHub release page must not be substituted.
 
 Runtime packages remain pinned to the validated Python 3.11 combination:
 
-- `clipkit==2.13.2`
+- `clipkit==2.14.0`
 - `biopython==1.87`
 - `numpy==1.26.4`
 - `zstandard==0.25.0`
@@ -45,39 +45,33 @@ Runtime packages remain pinned to the validated Python 3.11 combination:
 (`.ecomp`) archives require the optional module. Other `.ecomp` encodings are
 handled by ClipKIT itself.
 
-## Upstream 2.13.2 Changes
+## Upstream 2.14.0 Changes
 
-ClipKIT 2.13.2 is a release-quality and test-coverage update. Upstream states
-that it does not modify production behavior; comparison of the published
-package sources confirms that production code differs from 2.13.1 only in the
-reported version. Public CLI and Python APIs, dependency bounds, formats, and
-runtime requirements are unchanged.
+ClipKIT 2.14.0 adds explicit IUPAC ambiguity handling to the CLI and Python API:
 
-Upstream expanded its suite from 552 to 619 tests and reports line coverage
-increasing from 84.53% to 98.83%. New coverage exercises public APIs, CLI
-validation, file and report output, malformed inputs, reusable in-process
-execution, ECOMP archives, smart-gap and gappyout boundaries, and benchmark
-orchestration.
+- `missing` is the new default. Recognized ambiguity symbols are excluded from
+  entropy, composition, heterotachy, and KPI/KPIC state counts and contribute
+  to the effective unavailable fraction used by gap-based modes.
+- `fractional` distributes ambiguity symbols across their possible states for
+  entropy, composition, and heterotachy clade-entropy calculations. KPI/KPIC
+  classification remains conservative.
+- `literal` preserves the pre-2.14 interpretation by treating each non-gap
+  ambiguity symbol as a distinct state.
 
-The performance improvements introduced in 2.13.1 remain in place, including
-reduced repeated column-count passes in gappy, smart-gap, KPI, and KPIC modes,
-plus faster stop-codon masking, entropy and composition-bias scoring, and
-codon-site expansion.
+Use `--ambiguity_handling` or `--ambiguity-handling` to select a policy.
+Configured gap characters take precedence, and ClipKIT does not rewrite the
+symbols in kept or complementary alignments. The release also improves
+auto-detection of IUPAC-rich nucleotide alignments and adds configured-gap,
+ambiguity, and resolved-state data to HTML trim reports.
 
-The stop-codon feature introduced in 2.13.0 remains available unchanged.
-ClipKIT can opt in to masking terminal, internal, or all in-frame stop codons
-before alignment statistics and codon-aware trimming. The CLI option is
-`--remove_stop_codons {terminal,internal,all}`; the Python API accepts the same
-three values.
+Under the default gap sets, nucleotide `N/X` and protein `X` remain gaps.
+To fractionally expand those symbols, pass a custom `-gc` set that excludes
+them, for example `-gc '?*-'`.
 
-DNA and RNA stop codons are recognized case-insensitively, and terminal stops
-may be followed by trailing gap codons.
-
-The feature requires nucleotide input, codon-aware processing, and an alignment
-length divisible by three. Runtime text, log files, JSON reports, and Python API
-results expose terminal, internal, and total masked-stop counts. Masking remains
-disabled unless requested. Dependency bounds and external runtime requirements
-remain unchanged in 2.13.2.
+The dependency bounds, supported file formats, stop-codon masking interface,
+and external runtime requirements are unchanged from 2.13.2. Existing analyses
+that relied on ambiguity symbols as literal states should pass
+`--ambiguity_handling literal` explicitly when reproducing older results.
 
 ## Scope
 
@@ -100,6 +94,8 @@ taf-clipkit clipkit alignment.fa -o alignment.clipkit.fa
 taf-clipkit clipkit alignment.fa -m smart-gap -o smart-gap.fa
 taf-clipkit clipkit alignment.fa -m gappy -g 0.8 -o gappy.fa
 taf-clipkit clipkit alignment.fa -m kpic -o kpic.fa
+taf-clipkit clipkit ambiguous.fa -s nt --ambiguity_handling fractional \
+  -o ambiguity-aware.fa
 taf-clipkit clipkit alignment.fa -m c3 -co -o no-third-codon.fa
 taf-clipkit clipkit archive.ecomp -of fasta -o trimmed.fa
 taf-clipkit clipkit coding.fa -m gappy -g 0.9 -s nt -co \
@@ -151,9 +147,10 @@ use `-of fasta` or another supported format to override it.
 
 Depending on options, ClipKIT writes the trimmed alignment, a per-site log,
 the removed-site complementary alignment, JSON run metadata, and an HTML trim
-report. Stop-codon masking counts appear in runtime, log, and JSON output when
-the feature is enabled. Outputs are ordinary user files in the selected working
-directory.
+report. JSON and HTML reports record the ambiguity policy; HTML reports also
+carry configured-gap, ambiguity, and resolved-state tracks. Stop-codon masking
+counts appear in runtime, log, and JSON output when enabled. Outputs are
+ordinary user files in the selected working directory.
 
 ## Platform and Resources
 
@@ -169,6 +166,8 @@ No network, database, model, or external reference is needed at runtime.
 Independent offline smoke covers:
 
 - exact ClipKIT version, Python imports, source provenance, and native libraries
+- default, fractional, and literal IUPAC ambiguity behavior through the CLI and
+  Python API, including JSON and HTML report metadata
 - stop-codon masking through the CLI and Python API, including output sequence
   and JSON counts
 - real FASTA trimming with log, complement, JSON, and HTML report outputs
@@ -183,10 +182,6 @@ Dockerfile build-time checks intentionally use only normal CLI markers and a
 tiny alignment. Stop-codon output assertions, the larger optimization-path
 test, and HTML report generation stay in runtime smoke so multi-architecture
 buildx/QEMU builds are not burdened by unnecessarily strong build-time tests.
-
-Because 2.13.2 changes upstream tests and release metadata rather than
-production behavior, this release preserves the complete 2.13.1 smoke surface
-instead of adding redundant build-time work.
 
 Smoke validates packaging and representative execution, not every mode or
 biological interpretation on production alignments.
@@ -203,5 +198,5 @@ software for accurate phylogenomic inference*, PLOS Biology (2020), DOI
 Upstream resources:
 
 - <https://github.com/JLSteenwyk/ClipKIT>
-- <https://github.com/JLSteenwyk/ClipKIT/releases/tag/v2.13.2>
+- <https://github.com/JLSteenwyk/ClipKIT/releases/tag/v2.14.0>
 - <https://jlsteenwyk.com/ClipKIT/>

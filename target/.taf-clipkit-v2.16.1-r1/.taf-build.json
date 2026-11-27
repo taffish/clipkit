@@ -1,0 +1,6 @@
+{
+  "artifact": "taf-clipkit-v2.16.1-r1",
+  "schema": "taffish.build/v1",
+  "source_sha256": "9b306349002bbf436a5471b23d36d10a7b2233d4e2a9038dda98cae2dff0cee6",
+  "wrapper_sha256": "3e17e1079c3511526d802ecea8ab1cf86dd1cd6233f4bb6acbe43c188f3687a5"
+}

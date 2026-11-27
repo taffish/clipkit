@@ -1,0 +1,11 @@
+# CPython 3.12 native manylinux wheels: aarch64 and x86_64 only.
+# Reviewed PyPI artifacts; hashes verify identity, not continued availability.
+biopython==1.87 \
+    --hash=sha256:a3428155c3e0abbed7aad5ff08e034d435b84dfe560c8ec58e7d43abda4b6a43 \
+    --hash=sha256:65ba69ef0273e983a9036c2a228142bc34266179a5f03660fc281d332d718630
+numpy==1.26.4 \
+    --hash=sha256:9fad7dcb1aac3c7f0584a5a8133e3a43eeb2fe127f47e3632d43d677c66c102b \
+    --hash=sha256:675d61ffbfa78604709862923189bad94014bef562cc35cf61d3a07bba02a7ed
+zstandard==0.25.0 \
+    --hash=sha256:6dffecc361d079bb48d7caef5d673c88c8988d3d33fb74ab95b7ee6da42652ea \
+    --hash=sha256:5a56ba0db2d244117ed744dfa8f6f5b366e14148e00de44723413b2f3938a902
